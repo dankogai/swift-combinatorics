@@ -18,11 +18,13 @@ c.count
 for (i, a) in c.enumerated() {
     print("c[\(i)] =", a)
 }
+
 let bn = BaseN(of:"abcd", size:2)
 bn.count
 for (i, a) in bn.enumerated() {
     print("bn[\(i)] =", a)
 }
+
 let ps = PowerSet(of:"abcd")
 ps.count
 for (i, a) in ps.enumerated() {

@@ -45,7 +45,7 @@ extension CombinatoricsType {
             return self[idx]
         }
     }
-    public init<S:Sequence>(of:S, size:Index=64) where S.Element == SubElement {
+    public init<S:Sequence>(of:S, size:Index=0) where S.Element == SubElement {
         self.init(seed:Array(of), size:size)
     }
     public init(_ source:SubElement...) {
@@ -59,11 +59,10 @@ public struct CombinatoricsIndex<Index:SignedInteger> {
         public let seed:[SubElement] // immutable
         public let size:Index
         public let count:Index
-        public init(seed:[SubElement], size:Index=64) {
-            guard 0 < size else { fatalError() }
+        public init(seed:[SubElement], size:Index=0) {
             self.seed  = seed
-            self.size  = Swift.min(size, Index(seed.count))
-            self.count = Combinatorics.permutation(Index(seed.count), size)
+            self.size  = 0 < size && size < seed.count ? size : Index(seed.count)
+            self.count = Combinatorics.permutation(Index(seed.count), self.size)
         }
         public subscript(_ idx:Index)->[SubElement] {
             guard 0 <= idx && idx < count else { fatalError("Index out of range") }
@@ -84,7 +83,7 @@ public struct CombinatoricsIndex<Index:SignedInteger> {
     public struct Combination<SubElement> : CombinatoricsType, Sequence {
         public let perm:Permutation<SubElement>
         public let count:Index
-        public init(seed:[SubElement], size:Index=64) {
+        public init(seed:[SubElement], size:Index=0) {
             perm  = Permutation(seed:seed, size:size)
             count = Combinatorics.combination(perm.size, Index(perm.seed.count))
         }
@@ -108,11 +107,10 @@ public struct CombinatoricsIndex<Index:SignedInteger> {
         public let seed:[SubElement] // immutable
         public let size:Index
         public let count:Index
-        public init(seed:[SubElement], size:Index=64) {
-            guard 0 < size else { fatalError() }
+        public init(seed:[SubElement], size:Index=0) {
             self.seed  = seed
-            self.size  = Swift.min(size, Index(seed.count))
-            self.count =  (0..<Int(size)).reduce(Index(1)){ n,_ in n * Index(seed.count) }
+            self.size  = 0 < size && size < seed.count ? size : Index(seed.count)
+            self.count =  (0..<Int(self.size)).reduce(Index(1)){ n,_ in n * Index(seed.count) }
         }
         public subscript<I:SignedInteger>(_ idx:I)->[SubElement] {
             guard 0 <= idx && idx < count else { fatalError("Index out of range") }
@@ -129,8 +127,7 @@ public struct CombinatoricsIndex<Index:SignedInteger> {
     public struct PowerSet<SubElement> : CombinatoricsType, Sequence {
         public let seed:[SubElement] // immutable
         public let count:Index
-        public init(seed:[SubElement], size:Index=64) {
-            guard 0 < size else { fatalError() }
+        public init(seed:[SubElement], size:Index=0) {
             self.seed  = seed
             self.count = (0..<seed.count).reduce(Index(1)){ n,_ in n * Index(2) }
         }
@@ -148,7 +145,6 @@ public struct CombinatoricsIndex<Index:SignedInteger> {
     public struct CartesianProduct<SubElement>: Sequence where SubElement:Sequence  {
         public typealias Element = [SubElement.Element]
         public let seed:[[SubElement.Element]] // immutable
-        public var size:Index { return Index(seed.count) }
         public let count:Index
         public init(seed:[SubElement]) {
             guard !seed.isEmpty else { fatalError() }
@@ -162,7 +158,7 @@ public struct CombinatoricsIndex<Index:SignedInteger> {
             guard 0 <= idx && idx < count else { fatalError("Index out of range") }
             var result = [SubElement.Element]()
             var (q, r) = (Int(idx), 0)
-            for i in 0..<Int(size) {
+            for i in 0..<Int(Index(seed.count)) {
                 (q, r) = q.quotientAndRemainder(dividingBy: seed[i].count)
                 let e = seed[i][r]
                 result.append(e)
