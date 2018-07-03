@@ -73,7 +73,7 @@ Returns an iterator that returns the corresponding "digits".
 var d = BaseN(of:0...3)
 d.count // 4 ** 4 == 256
 d.map { $0 } // [[0,0,0,0]...[3,3,3,3]]
-d = Combination(of:0...3)
+d = BaseN(of:0...3)
 d.count      // 16
 d.map { $0 } // [[0,0]...[3,3]]
 ````
