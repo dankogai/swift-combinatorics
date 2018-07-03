@@ -1,10 +1,10 @@
-# swift-combinatorics
-Combinatorics in Swift
-
 [![Swift 4.1](https://img.shields.io/badge/swift-4.1-brightgreen.svg)](https://swift.org)
 [![MIT LiCENSE](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE)
 [![build status](https://secure.travis-ci.org/dankogai/swift-combinatorics.png)](http://travis-ci.org/dankogai/swift-combinatorics)
 
+# swift-combinatorics
+
+Combinatorics in Swift
 
 ## Synopsis
 
@@ -235,7 +235,7 @@ and the following to the `.target` argument:
 Now all you have to do is:
 
 ```swift
-import JSON
+import Combinatorics
 ```
 
 in your code.  Enjoy!
