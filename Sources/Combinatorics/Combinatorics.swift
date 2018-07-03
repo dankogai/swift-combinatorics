@@ -142,7 +142,35 @@ public struct CombinatoricsIndex<Index:SignedInteger> {
     }
     /// CartesianProduct
     /// is slightly but significantly different from the rest so it DOES NOT CONFORM TO CombinatoricsType
-    public struct CartesianProduct<SubElement>: Sequence where SubElement:Sequence  {
+    public struct CartesianProduct<L, R>:Collection where L:Collection, R:Collection {
+        public typealias Element = (L.Element, R.Element)
+        public let lhs:L
+        public let rhs:R
+        public init(_ l:L, _ r:R) {
+            (lhs, rhs) = (l, r)
+        }
+        public var count:Index { return Index(lhs.count) * Index(rhs.count) }
+        public var startIndex:Index { return 0 }
+        public var endIndex: Index  { return count }
+        public func index(after i: Index) -> Index { return i + 1 }
+        public subscript(_ idx:Index)->Element {
+            guard 0 <= idx && idx < count else { fatalError("Index out of range") }
+            let (l, r) = Int(idx).quotientAndRemainder(dividingBy: rhs.count)
+            let lv = lhs[lhs.index(lhs.startIndex, offsetBy:l)]
+            let rv = rhs[rhs.index(rhs.startIndex, offsetBy:r)]
+            return (lv, rv)
+        }
+        public func makeIterator() -> AnyIterator<Element> {
+            var idx = Index(-1)
+            return AnyIterator {
+                idx += 1
+                guard idx < self.count else { return nil }
+                return self[idx]
+            }
+        }
+    }
+    /// Cartesian product of single element type
+    public struct ProductSet<SubElement>: Sequence where SubElement:Sequence  {
         public typealias Element = [SubElement.Element]
         public let seed:[[SubElement.Element]] // immutable
         public let count:Index
@@ -180,3 +208,4 @@ public typealias Combination        = CombinatoricsIndex<Int>.Combination
 public typealias BaseN              = CombinatoricsIndex<Int>.BaseN
 public typealias PowerSet           = CombinatoricsIndex<Int>.PowerSet
 public typealias CartesianProduct   = CombinatoricsIndex<Int>.CartesianProduct
+public typealias ProductSet         = CombinatoricsIndex<Int>.ProductSet
