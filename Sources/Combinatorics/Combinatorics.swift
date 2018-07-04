@@ -109,7 +109,7 @@ public struct CombinatoricsIndex<Index:SignedInteger> {
         public let count:Index
         public init(seed:[SubElement], size:Index=0) {
             self.seed  = seed
-            self.size  = 0 < size && size < seed.count ? size : Index(seed.count)
+            self.size  = 0 < size ? size : Index(seed.count) // seed.count <= size is okay
             self.count =  (0..<Int(self.size)).reduce(Index(1)){ n,_ in n * Index(seed.count) }
         }
         public subscript<I:SignedInteger>(_ idx:I)->[SubElement] {
