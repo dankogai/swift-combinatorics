@@ -43,14 +43,14 @@ The first one is the canonical initializer.  `size` specifies the size of array 
 
 Returns an iterator that returns the permuted array.
 
-````swift
 var p = Permutation(of:"abcd")
 p.count      // 24
+p[p.count-1] // ["d","c","b","a"]
 p.map { $0 } // [["a","b","c","d"]...["d","c","b","a"]]
 p = Permutation(of:"abcd", size:2)
 p.count      // 12
+p[p.count-1] // ["d", "c"]
 p.map { $0 } // [["a","b"] ... ["d","c"]]
-````
 
 ### `Combination`
 
@@ -59,9 +59,11 @@ Returns an iterator that returns the permuted array but arrays with same element
 ````swift
 var c = Combination(of:"abcd")
 c.count      // 1
+c[c.count-1] // ["a","b","c","d"]
 c.map { $0 } // [["a","b","c","d"]]
 c = Combination(of:"abcd", size:2)
 c.count      // 6
+c[c.count-1] // ["c","d"]
 c.map { $0 } // [["a","b"],["a","c"],["a","d"],["b","c"], ["b","d"], ["c","d"]]
 ````
 
@@ -71,10 +73,12 @@ Returns an iterator that returns the corresponding "digits".
 
 ````swift
 var d = BaseN(of:0...3)
-d.count // 4 ** 4 == 256
+d.count      // 4 ** 4 == 256
+d[d.count-1] // [3,3,3,3]
 d.map { $0 } // [[0,0,0,0]...[3,3,3,3]]
-d = BaseN(of:0...3)
+d = BaseN(of:0...3, size:2)
 d.count      // 16
+d[d.count-1] // [3,3]
 d.map { $0 } // [[0,0]...[3,3]]
 ````
 
