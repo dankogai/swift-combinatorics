@@ -43,6 +43,7 @@ The first one is the canonical initializer.  `size` specifies the size of array 
 
 Returns an iterator that returns the permuted array.
 
+```swift
 var p = Permutation(of:"abcd")
 p.count      // 24
 p[p.count-1] // ["d","c","b","a"]
@@ -51,6 +52,7 @@ p = Permutation(of:"abcd", size:2)
 p.count      // 12
 p[p.count-1] // ["d", "c"]
 p.map { $0 } // [["a","b"] ... ["d","c"]]
+```
 
 ### `Combination`
 
