@@ -6,14 +6,21 @@ public class Combinatorics {
         return n < 1 ? 1 : (1...Int(n)).reduce(T(1)){ $0 * T($1) }
     }
     public static func permutation<T:SignedInteger>(_ n:T, _ k:T)->T {
-        guard k <= n else { return permutation(k, n) }
-        guard 0 <= n else { fatalError() }
-        return (Int(n - k + 1)...Int(n)).reduce(T(1)){ $0 * T($1) }
+        if 0 == k { return 1 }
+        if n <  k { return 0 }
+        var (vp, vn, vk) = (T(1), n, k)
+        while (0 < vk) {
+            vp *= vn;
+            vk -= 1
+            vn -= 1
+        }
+        return vp
     }
     public static func combination<T:SignedInteger>(_ n:T, _ k:T)->T {
-        guard k <= n else { return combination(k, n) }
-        guard 0 <= n else { fatalError() }
-        return permutation(k, n) / factorial(k)
+        if 0 == k { return 1 }
+        if n == k { return 1 }
+        if n <  k { return 0 }
+        return permutation(n, k) / permutation(k,k)
     }
     // cf. https://en.wikipedia.org/wiki/Factorial_number_system
     public static func factoradic<T:SignedInteger>(_ n:T, _ c:T)->[Int] {
@@ -26,6 +33,21 @@ public class Combinatorics {
             i += 1
         } while q != 0
         return result.reversed()
+    }
+    public static func combinadic<T:SignedInteger>(_ n:Int, _ k:Int, _ i:T)->[Int] {
+        let count = combination(n, k);
+        guard 0 <= i && i < count else { fatalError("Index out of range") }
+        var digits:[Int] = []
+        var (a, b) = (n, k)
+        var x = T(count) - 1 - i
+        for _ in 0..<k {
+            a -= 1
+            while x < T(combination(a, b)) { a -= 1 }
+            digits.append(n - 1 - a)
+            x -= T(combination(a, b))
+            b -= 1
+        }
+        return digits
     }
 }
 public protocol CombinatoricsType {
@@ -81,25 +103,23 @@ public struct CombinatoricsIndex<Index:SignedInteger> {
     }
     /// combination
     public struct Combination<SubElement> : CombinatoricsType, Sequence {
-        public let perm:Permutation<SubElement>
+        public let seed:[SubElement] // immutable
+        public let size:Index
         public let count:Index
         public init(seed:[SubElement], size:Index=0) {
-            perm  = Permutation(seed:seed, size:size)
-            count = Combinatorics.combination(perm.size, Index(perm.seed.count))
+            self.seed  = seed
+            self.size  = 0 < size && size < seed.count ? size : Index(seed.count)
+            self.count = Combinatorics.combination(Index(seed.count), self.size)
         }
         public subscript(_ idx:Index)->[SubElement] {
             guard 0 <= idx && idx < count else { fatalError("Index out of range") }
             // cf. https://en.wikipedia.org/wiki/Combinatorial_number_system
-            func findIndex(_ n:Index)->Index {
-                guard 2 < n else { return n }
-                let p = n - 1
-                let s = p & -p
-                let r = p + s
-                let t = r & -r
-                let m = ((t / s) >> 1) - 1
-                return r | m
+            var result:[SubElement] = []
+            let digits = Combinatorics.combinadic(Int(seed.count), Int(size), idx)
+            for d in digits {
+                result.append(seed[d])
             }
-            return perm[findIndex(idx)]
+            return result
         }
     }
     /// BaseN
