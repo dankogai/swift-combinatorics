@@ -34,20 +34,22 @@ public class Combinatorics {
         } while q != 0
         return result.reversed()
     }
-    public static func combinadic<T:SignedInteger>(_ n:T, _ k:T, _ i:T)->[Int] {
+    public static func combinadic<T:SignedInteger>(_ n:T, _ k:T)->(_ i:T)->[Int] {
         let count = combination(n, k);
-        guard 0 <= i && i < count else { fatalError("Index out of range") }
-        var digits:[Int] = []
-        var (a, b) = (n, k)
-        var x = count - 1 - i
-        for _ in 0..<Int(k) {
-            a -= 1
-            while x < combination(a, b) { a -= 1 }
-            digits.append(Int(n - 1 - a))
-            x -= combination(a, b)
-            b -= 1
+        return { i in
+            guard 0 <= i && i < count else { fatalError("Index out of range") }
+            var digits:[Int] = []
+            var (a, b) = (n, k)
+            var x = count - 1 - i
+            for _ in 0..<Int(k) {
+                a -= 1
+                while x < combination(a, b) { a -= 1 }
+                digits.append(Int(n - 1 - a))
+                x -= combination(a, b)
+                b -= 1
+            }
+            return digits
         }
-        return digits
     }
 }
 public protocol CombinatoricsType {
@@ -106,19 +108,18 @@ public struct CombinatoricsIndex<Index:SignedInteger> {
         public let seed:[SubElement] // immutable
         public let size:Index
         public let count:Index
+        public let digits:(Index)->[Int]
         public init(seed:[SubElement], size:Index=0) {
             self.seed  = seed
             self.size  = 0 < size && size < seed.count ? size : Index(seed.count)
             self.count = Combinatorics.combination(Index(seed.count), self.size)
+            self.digits = Combinatorics.combinadic(Index(seed.count), size)
         }
         public subscript(_ idx:Index)->[SubElement] {
             guard 0 <= idx && idx < count else { fatalError("Index out of range") }
             // cf. https://en.wikipedia.org/wiki/Combinatorial_number_system
             var result:[SubElement] = []
-            let digits = Combinatorics.combinadic(Index(seed.count), size, idx)
-            for d in digits {
-                result.append(seed[d])
-            }
+            digits(idx).forEach{ result.append(seed[$0]) }
             return result
         }
     }
