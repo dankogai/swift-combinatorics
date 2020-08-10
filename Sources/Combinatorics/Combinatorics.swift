@@ -8,7 +8,7 @@ public class Combinatorics {
     public static func permutation<T:SignedInteger>(_ n:T, _ k:T)->T {
         if 0 == k { return 1 }
         if n <  k { return 0 }
-        var (vp, vn, vk) = (T(1), n, k)
+        var (vp, vn, vk) = (T(1), T(n), T(k))
         while (0 < vk) {
             vp *= vn;
             vk -= 1
