@@ -34,17 +34,17 @@ public class Combinatorics {
         } while q != 0
         return result.reversed()
     }
-    public static func combinadic<T:SignedInteger>(_ n:Int, _ k:Int, _ i:T)->[Int] {
+    public static func combinadic<T:SignedInteger>(_ n:T, _ k:T, _ i:T)->[Int] {
         let count = combination(n, k);
         guard 0 <= i && i < count else { fatalError("Index out of range") }
         var digits:[Int] = []
         var (a, b) = (n, k)
-        var x = T(count) - 1 - i
-        for _ in 0..<k {
+        var x = count - 1 - i
+        for _ in 0..<Int(k) {
             a -= 1
-            while x < T(combination(a, b)) { a -= 1 }
-            digits.append(n - 1 - a)
-            x -= T(combination(a, b))
+            while x < combination(a, b) { a -= 1 }
+            digits.append(Int(n - 1 - a))
+            x -= combination(a, b)
             b -= 1
         }
         return digits
@@ -115,7 +115,7 @@ public struct CombinatoricsIndex<Index:SignedInteger> {
             guard 0 <= idx && idx < count else { fatalError("Index out of range") }
             // cf. https://en.wikipedia.org/wiki/Combinatorial_number_system
             var result:[SubElement] = []
-            let digits = Combinatorics.combinadic(Int(seed.count), Int(size), idx)
+            let digits = Combinatorics.combinadic(Index(seed.count), size, idx)
             for d in digits {
                 result.append(seed[d])
             }
