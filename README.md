@@ -1,6 +1,6 @@
 [![Swift 4.1](https://img.shields.io/badge/swift-4.1-brightgreen.svg)](https://swift.org)
 [![MIT LiCENSE](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE)
-[![build status](https://secure.travis-ci.org/dankogai/swift-combinatorics.png)](http://travis-ci.org/dankogai/swift-combinatorics)
+[![CI via GitHub Actions](https://github.com/dankogai/swift-combinatorics/actions/workflows/swift.yml/badge.svg)](https://github.com/dankogai/swift-combinatorics/actions/workflows/swift.yml)
 
 # swift-combinatorics
 
