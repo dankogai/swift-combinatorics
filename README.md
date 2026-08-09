@@ -190,25 +190,10 @@ The flip side: generating an element from scratch costs more than generating it 
 
 ### build
 
-```sh
-$ git clone https://github.com/dankogai/swift-combinatorics.git
-$ cd swift-combinatorics # the following assumes your $PWD is here
-$ swift build
-```
-
 ### REPL
 
-Simply
-
 ```sh
-$ scripts/run-repl.sh
-```
-
-or
-
-```sh
-$ swift build && swift -I.build/debug -L.build/debug -lCombinatorics
-
+$ swift run ~~repl
 ```
 
 and in your repl,
@@ -228,21 +213,6 @@ $R0: [String] = 120 values {
 ### Xcode
 
 No Xcode project is checked in — recent versions of Xcode open Swift packages directly.  Just open the package directory (or `Package.swift`) in Xcode.  `macOS.playground` is written as a manual.
-
-### iOS and Swift Playground
-
-Swift Playgrounds does not support modules.  But don't worry.  This module is so compact all you need is copy [Combinatorics.swift].
-
-[Combinatorics.swift]: Sources/Combinatorics/Combinatorics.swift
-
-In case of Swift Playgrounds just copy it under `Sources` folder.  If you are too lazy just run:
-
-
-```sh
-$ scripts/ios-prep.sh
-```
-
-and `iOS/Combinatorics.playground` is all set.  You do not have to `import Combinatorics` therein.
 
 ### From Your SwiftPM-Managed Projects
 
