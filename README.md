@@ -56,7 +56,7 @@ p.map { $0 } // [["a","b"] ... ["d","c"]]
 
 ### `Combination`
 
-Returns an iterator that returns the permuted array but arrays with same elements are treated as the same, regardless of the order.  Therefore you should not ommit `size` or you get only one result.
+Returns an iterator that returns the permuted array but arrays with same elements are treated as the same, regardless of the order.  Therefore you should not omit `size` or you get only one result.
 
 ````swift
 var c = Combination(of:"abcd")
@@ -100,7 +100,7 @@ Returns an iterator that returns the element of the cartesian product for each i
 
 ````swift
 let suits = "♠️♦️❤️♣️"
-let ranks =  1..13
+let ranks =  1...13
 let cp = CartesianProduct(suits, ranks)
 cp.count // 52
 cp.map { $0 } //[("♠️",1)...("♣️",13)]
@@ -108,7 +108,7 @@ cp.map { $0 } //[("♠️",1)...("♣️",13)]
 
 Unlike other iterators `CartesianProduct` takes two `Collection`s and returns their Cartesian product in tuples. The type of their `.Element` do not have to match.
 
-The iterator itself is also a collection so you can build multidimensional Cartesian products by succesively applying multiplicands.
+The iterator itself is also a collection so you can build multidimensional Cartesian products by successively applying multiplicands.
 
 ```swift
 let cp = CartesianProduct("01", "abc")
@@ -117,7 +117,7 @@ cp.count // 24
 cpcp.map{ $0 } // [(("0","a"),"A")...(("1","c"),"G")]
 ```
 
-As you see `CartesianProduct` returns a tuple.  This is mathmatically correct but harder to work with.  But in Swift `(T,T)` is a different type from `(T,T,T)` so you cannot write a function that returns tuples of different lengths.
+As you see `CartesianProduct` returns a tuple.  This is mathematically correct but harder to work with.  But in Swift `(T,T)` is a different type from `(T,T,T)` so you cannot write a function that returns tuples of different lengths.
 
 To mitigate this, `Combinatorics` offers `ProductSet`.  The type of all elements must be identical but you get an array instead of tuple.
 
@@ -139,6 +139,13 @@ permutation<T>(_ n:T, _ k:T)->T    // nPk
 combination<T>(_ n:T, _ k:T)->T    // nCk
 ```
 
+And `SignedInteger` is extended with the following methods.
+
+```swift
+n.factoradic()   // digits of n in the factorial number system
+n.combinadic(k)  // (i)->[Int] that maps i to its combinadic digits for nCk
+```
+
 As you see they are generically defined so you can use not only `Int` but also `BigInt` where available.
 
 ### Using index other than `Int`
@@ -155,6 +162,29 @@ public typealias ProductSet         = CombinatoricsIndex<Int>.ProductSet
 Why? Because `Int` is often big enough for combinatorics.  Fortunately Swift allows you to generically define `subscript` its index does not have to be `Int`.  See [BigCombinatorics] to see how to use `BigInt` indices.
 
 [BigCombinatorics]: BigCombinatorics/
+
+## vs. swift-algorithms
+
+Apple's [swift-algorithms] also covers combinatorics, via extension methods on `Collection`: `permutations(ofCount:)`, `uniquePermutations(ofCount:)`, `combinations(ofCount:)`, and `product(_:_:)`.  The two packages overlap, but they are built around different access models.
+
+[swift-algorithms]: https://github.com/apple/swift-algorithms
+
+|                            | swift-combinatorics | swift-algorithms |
+|----------------------------|---------------------|------------------|
+| access model               | random access by index: `p[i]` | sequential iteration only (`product` alone is random-access) |
+| `count` without iterating  | always: `p.count` | `combinations`: yes; `permutations`: no |
+| index type                 | any `SignedInteger`, including `BigInt` | `Int` |
+| permutations               | `Permutation` | `permutations(ofCount:)` |
+| combinations               | `Combination` | `combinations(ofCount:)` |
+| combinations of several sizes | — | `combinations(ofCount: 2...4)` |
+| deduplicated permutations  | — | `uniquePermutations(ofCount:)` |
+| cartesian product          | `CartesianProduct` (binary), `ProductSet` (n-ary) | `product(_:_:)` (binary; compose for more) |
+| base-n / power set         | `BaseN`, `PowerSet` | — |
+| arithmetic functions       | `factorial`, `permutation`, `combination`, `.factoradic()`, `.combinadic()` | — |
+
+The defining difference is the first row.  In swift-algorithms, `PermutationsSequence` and `CombinationsSequence` conform only to `Sequence`: each element is generated from its predecessor, so you can reach the *i*-th element only by iterating past the first *i*.  Every iterator in this package is instead defined by its `subscript`, so you can jump straight to any element — sample a huge space at random, split an index range across threads, or resume where you left off.  Combined with `BigInt` indices, the space itself can be astronomically large (`Permutation` of 100 elements has 100! ≈ 9.3 × 10¹⁵⁷ entries) and still be indexed.
+
+The flip side: generating an element from scratch costs more than generating it from its predecessor, so if all you ever do is enumerate front to back — or you want the lazy composition and deduplication swift-algorithms provides — swift-algorithms is a fine choice.  If you need to *index* the combinatorial space, this package is for you.
 
 ## Usage
 
@@ -197,17 +227,11 @@ $R0: [String] = 120 values {
 
 ### Xcode
 
-Xcode project is deliberately excluded from the repository because it should be generated via `swift package generate-xcodeproj` . For convenience, you can
-
-```sh
-$ scripts/prep-xcode
-```
-
-And the Workspace opens up for you with Playground on top.  The playground is written as a manual.
+No Xcode project is checked in — recent versions of Xcode open Swift packages directly.  Just open the package directory (or `Package.swift`) in Xcode.  `macOS.playground` is written as a manual.
 
 ### iOS and Swift Playground
 
-Unfortunately Swift Package Manager does not support iOS.  To make matters worse Swift Playgrounds does not support modules.  But don't worry.  This module is so compact all you need is copy [Combinatorics.swift].
+Swift Playgrounds does not support modules.  But don't worry.  This module is so compact all you need is copy [Combinatorics.swift].
 
 [Combinatorics.swift]: Sources/Combinatorics/Combinatorics.swift
 
