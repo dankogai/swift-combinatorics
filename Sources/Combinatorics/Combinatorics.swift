@@ -20,7 +20,15 @@ public func combination<T:SignedInteger>(_ n:T, _ k:T)->T {
     if 0 == k { return 1 }
     if n == k { return 1 }
     if n <  k { return 0 }
-    return permutation(n, k) / permutation(k, k)
+    let l = Swift.min(k, n - k) // nCk == nC(n-k); the smaller shortens the loop
+    var (result, i) = (T(1), T(0))
+    while i < l {
+        // result * (n - i) is divisible by (i + 1) because
+        // the lhs == combination(n, i + 1) * (i + 1)
+        result = result * (n - i) / (i + 1)
+        i += 1
+    }
+    return result
 }
 extension SignedInteger {
     // cf. https://en.wikipedia.org/wiki/Factorial_number_system
@@ -44,11 +52,18 @@ extension SignedInteger {
             var digits:[Int] = []
             var (a, b) = (n, k)
             var x = count - 1 - i
+            var c = count // == combination(a, b), maintained incrementally below
             for _ in 0..<Int(k) {
-                a -= 1
-                while x < combination(a, b) { a -= 1 }
+                // combination(a - 1, b) == combination(a, b) * (a - b) / a
+                repeat {
+                    c = c * (a - b) / a
+                    a -= 1
+                } while x < c
                 digits.append(Int(n - 1 - a))
-                x -= combination(a, b)
+                x -= c
+                // combination(a, b - 1) == combination(a, b) * b / (a - b + 1)
+                // except when a == b - 1: combination(a, b) == 0 but combination(a, b - 1) == 1
+                c = c == 0 ? 1 : c * b / (a - b + 1)
                 b -= 1
             }
             return digits
@@ -117,7 +132,7 @@ public struct CombinatoricsIndex<Index:SignedInteger> {
             self.seed  = seed
             self.size  = 0 < size && size < seed.count ? size : Index(seed.count)
             self.count = combination(Index(seed.count), self.size)
-            self.digits = Index(seed.count).combinadic(size)
+            self.digits = Index(seed.count).combinadic(self.size)
         }
         public subscript(_ idx:Index)->[SubElement] {
             guard 0 <= idx && idx < count else { fatalError("Index out of range") }

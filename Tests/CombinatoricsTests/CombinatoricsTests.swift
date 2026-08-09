@@ -17,6 +17,9 @@ import Testing
         #expect(combination(10, 5) == 252)
         #expect(combination(10, 10) == 1)
         #expect(combination(5, 7) == 0)
+        // results fit in Int but would overflow via permutation(n, k) / permutation(k, k)
+        #expect(combination(30, 15) == 155117520)
+        #expect(combination(52, 26) == 495918532948104)
     }
     @Test func testFactoradic() {
         #expect(0.factoradic() == [0])
@@ -42,6 +45,14 @@ import Testing
         let c = Combination(of:"abcd", size:2)
         #expect(c.count == 6)
         #expect(c.map{ String($0) } == ["ab","ac","ad","bc","bd","cd"])
+        // default size yields the single full-length combination
+        let cd = Combination(of:"abcd")
+        #expect(cd.count == 1)
+        #expect(cd[0] == ["a","b","c","d"])
+        let big = Combination(of:0..<30, size:15)
+        #expect(big.count == 155117520)
+        #expect(big[0] == Array(0..<15))
+        #expect(big[big.count - 1] == Array(15..<30))
     }
     @Test func testBaseN() {
         let bn = BaseN(of:"ab", size:2)
