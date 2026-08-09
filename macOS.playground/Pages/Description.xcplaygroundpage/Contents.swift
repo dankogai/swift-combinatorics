@@ -2,9 +2,9 @@
 
 import Combinatorics
 
-Combinatorics.factorial(1)
-Combinatorics.permutation(10, 5)
-Combinatorics.combination(10, 5)
+factorial(1)
+permutation(10, 5)
+combination(10, 5)
 
 let p = Permutation(of:"abcd", size:2)
 p.count

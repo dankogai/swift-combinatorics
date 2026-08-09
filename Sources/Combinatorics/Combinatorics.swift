@@ -1,40 +1,43 @@
-// placeholder for static functions
-public class Combinatorics {
-    /// factorial of n. generically written so it can accept BigInt and Such
-    public static func factorial<T:SignedInteger>(_ n:T)->T {
-        guard 0 <= n else { fatalError() }
-        return n < 1 ? 1 : (1...Int(n)).reduce(T(1)){ $0 * T($1) }
+/// factorial of n. generically written so it can accept BigInt and Such
+public func factorial<T:SignedInteger>(_ n:T)->T {
+    guard 0 <= n else { fatalError() }
+    return n < 1 ? 1 : (1...Int(n)).reduce(T(1)){ $0 * T($1) }
+}
+/// number of permutations of n objects taken k at a time (nPk)
+public func permutation<T:SignedInteger>(_ n:T, _ k:T)->T {
+    if 0 == k { return 1 }
+    if n <  k { return 0 }
+    var (vp, vn, vk) = (T(1), n, k)
+    while (0 < vk) {
+        vp *= vn;
+        vk -= 1
+        vn -= 1
     }
-    public static func permutation<T:SignedInteger>(_ n:T, _ k:T)->T {
-        if 0 == k { return 1 }
-        if n <  k { return 0 }
-        var (vp, vn, vk) = (T(1), T(n), T(k))
-        while (0 < vk) {
-            vp *= vn;
-            vk -= 1
-            vn -= 1
-        }
-        return vp
-    }
-    public static func combination<T:SignedInteger>(_ n:T, _ k:T)->T {
-        if 0 == k { return 1 }
-        if n == k { return 1 }
-        if n <  k { return 0 }
-        return permutation(n, k) / permutation(k,k)
-    }
+    return vp
+}
+/// number of combinations of n objects taken k at a time (nCk)
+public func combination<T:SignedInteger>(_ n:T, _ k:T)->T {
+    if 0 == k { return 1 }
+    if n == k { return 1 }
+    if n <  k { return 0 }
+    return permutation(n, k) / permutation(k, k)
+}
+extension SignedInteger {
     // cf. https://en.wikipedia.org/wiki/Factorial_number_system
-    public static func factoradic<T:SignedInteger>(_ n:T, _ c:T)->[Int] {
-        guard 0 <= n else { fatalError() }
-        var (q, r, i) = (n, T(0), Int(1))
-        var result = [Int](repeating:0, count:Int(c))
+    public func factoradic()->[Int] {
+        guard 0 <= self else { fatalError() }
+        var (q, r, i) = (self, Self(0), Int(1))
+        var result = [Int]()
         repeat {
-            (q, r) = q.quotientAndRemainder(dividingBy: T(i))
-            result[i - 1] = Int(r)
+            (q, r) = q.quotientAndRemainder(dividingBy: Self(i))
+            result.append(Int(r))
             i += 1
         } while q != 0
         return result.reversed()
     }
-    public static func combinadic<T:SignedInteger>(_ n:T, _ k:T)->(_ i:T)->[Int] {
+    // cf. https://en.wikipedia.org/wiki/Combinatorial_number_system
+    public func combinadic(_ k:Self)->(_ i:Self)->[Int] {
+        let n = self
         let count = combination(n, k);
         return { i in
             guard 0 <= i && i < count else { fatalError("Index out of range") }
@@ -86,15 +89,16 @@ public struct CombinatoricsIndex<Index:SignedInteger> {
         public init(seed:[SubElement], size:Index=0) {
             self.seed  = seed
             self.size  = 0 < size && size < seed.count ? size : Index(seed.count)
-            self.count = Combinatorics.permutation(Index(seed.count), self.size)
+            self.count = permutation(Index(seed.count), self.size)
         }
         public subscript(_ idx:Index)->[SubElement] {
             guard 0 <= idx && idx < count else { fatalError("Index out of range") }
             guard 1 < size else {
                 return [seed[Int(idx)]]
             }
-            let skip   = Combinatorics.factorial(Index(seed.count) - size)
-            let digits = Combinatorics.factoradic(idx * skip, Index(seed.count))
+            let skip   = factorial(Index(seed.count) - size)
+            var digits = (idx * skip).factoradic()
+            digits.insert(contentsOf:[Int](repeating:0, count:seed.count - digits.count), at:0)
             var source = seed
             var result = [SubElement]()
             for i in 0 ..< Int(size) {
@@ -112,8 +116,8 @@ public struct CombinatoricsIndex<Index:SignedInteger> {
         public init(seed:[SubElement], size:Index=0) {
             self.seed  = seed
             self.size  = 0 < size && size < seed.count ? size : Index(seed.count)
-            self.count = Combinatorics.combination(Index(seed.count), self.size)
-            self.digits = Combinatorics.combinadic(Index(seed.count), size)
+            self.count = combination(Index(seed.count), self.size)
+            self.digits = Index(seed.count).combinadic(size)
         }
         public subscript(_ idx:Index)->[SubElement] {
             guard 0 <= idx && idx < count else { fatalError("Index out of range") }
