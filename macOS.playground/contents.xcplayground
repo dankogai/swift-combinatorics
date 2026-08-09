@@ -2,7 +2,8 @@
 <playground version='6.0' target-platform='macos'>
     <pages>
         <page name='Synopsis'/>
-        <page name='Description'/>
+        <page name='Iterators'/>
+        <page name='Arithmetic Functions'/>
         <page name='Scratch'/>
     </pages>
 </playground>
