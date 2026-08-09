@@ -130,13 +130,13 @@ ps.map{ $0 } // [[0, 2, 3, 4] ... [1, 6, 12, 20]]
 
 ### Arithmetic Functions
 
-This module also comes with followings arithmetic functions that are bundled in `Combinatorics` as static functions.
+This module also comes with the following arithmetic functions.
 
 ```swift
 // T:SignedInteger
-Combinatorics.factorial<T>(_ n:T)->T
-Combinatorics.permutation<T>(_ n:T, _ k:T)->T
-Combinatorics.combination<T>(_ n:T, _ k:T)->T
+factorial<T>(_ n:T)->T             // factorial of n
+permutation<T>(_ n:T, _ k:T)->T    // nPk
+combination<T>(_ n:T, _ k:T)->T    // nCk
 ```
 
 As you see they are generically defined so you can use not only `Int` but also `BigInt` where available.
