@@ -2,7 +2,12 @@
 <playground version='6.0' target-platform='macos'>
     <pages>
         <page name='Synopsis'/>
-        <page name='Iterators'/>
+        <page name='Permutation'/>
+        <page name='Combination'/>
+        <page name='BaseN'/>
+        <page name='PowerSet'/>
+        <page name='CartesianProduct'/>
+        <page name='ProductSet'/>
         <page name='Arithmetic Functions'/>
         <page name='Scratch'/>
     </pages>
