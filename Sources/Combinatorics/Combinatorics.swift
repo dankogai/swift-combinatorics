@@ -109,7 +109,7 @@ public struct CombinatoricsIndex<Index:SignedInteger> {
         public subscript(_ idx:Index)->[SubElement] {
             guard 0 <= idx && idx < count else { fatalError("Index out of range") }
             guard 1 < size else {
-                return [seed[Int(idx)]]
+                return seed.isEmpty ? [] : [seed[Int(idx)]]
             }
             let skip   = factorial(Index(seed.count) - size)
             var digits = (idx * skip).factoradic()
@@ -118,6 +118,62 @@ public struct CombinatoricsIndex<Index:SignedInteger> {
             var result = [SubElement]()
             for i in 0 ..< Int(size) {
                 result.append(source.remove(at: digits[i]))
+            }
+            return result
+        }
+    }
+    /// permutations of a multiset — duplicate elements yield each distinct ordering only once
+    public struct UniquePermutation<SubElement:Hashable> : CombinatoricsType, Sequence {
+        public let seed:[SubElement] // immutable
+        public let size:Index
+        public let count:Index
+        let uniq:[SubElement] // distinct elements in order of first appearance
+        let multiplicity:[Int] // how many times each appears in seed
+        public init(seed:[SubElement], size:Index=0) {
+            self.seed = seed
+            self.size = 0 < size && size < seed.count ? size : Index(seed.count)
+            var (uniq, mult, seen) = ([SubElement](), [Int](), [SubElement:Int]())
+            for e in seed {
+                if let i = seen[e] { mult[i] += 1 }
+                else { seen[e] = uniq.count; uniq.append(e); mult.append(1) }
+            }
+            self.uniq = uniq
+            self.multiplicity = mult
+            self.count = Self.sequences(mult, Int(self.size))
+        }
+        /// number of distinct sequences of `slots` elements drawn from the multiset;
+        /// D_t(s) = sum_j combination(s, j) * D_{t-1}(s - j) over j copies of type t
+        static func sequences(_ counts:[Int], _ slots:Int)->Index {
+            var h = [Index](repeating:0, count:slots + 1)
+            h[0] = 1
+            var filled = 0 // h[s] == 0 for filled < s
+            for c in counts {
+                let newFilled = Swift.min(slots, filled + c)
+                var next = [Index](repeating:0, count:slots + 1)
+                for s in 0...newFilled {
+                    var sum = Index(0)
+                    for j in Swift.max(0, s - filled)...Swift.min(c, s) {
+                        sum += combination(Index(s), Index(j)) * h[s - j]
+                    }
+                    next[s] = sum
+                }
+                (h, filled) = (next, newFilled)
+            }
+            return h[slots]
+        }
+        public subscript(_ idx:Index)->[SubElement] {
+            guard 0 <= idx && idx < count else { fatalError("Index out of range") }
+            var x = idx
+            var counts = multiplicity
+            var result = [SubElement]()
+            for slots in stride(from:Int(size) - 1, through:0, by: -1) {
+                for i in 0..<uniq.count where 0 < counts[i] {
+                    counts[i] -= 1
+                    let block = Self.sequences(counts, slots)
+                    if x < block { result.append(uniq[i]); break }
+                    x -= block
+                    counts[i] += 1
+                }
             }
             return result
         }
@@ -140,6 +196,88 @@ public struct CombinatoricsIndex<Index:SignedInteger> {
             var result:[SubElement] = []
             digits(idx).forEach{ result.append(seed[$0]) }
             return result
+        }
+    }
+    /// permutations of several sizes in one sequence
+    /// like CartesianProduct it DOES NOT CONFORM TO CombinatoricsType
+    public struct Permutations<SubElement> : Sequence {
+        public typealias Element = [SubElement]
+        public let seed:[SubElement] // immutable
+        public let count:Index
+        let blocks:[(offset:Index, count:Index, at:(Index)->[SubElement])]
+        public init(seed:[SubElement], sizes:[Int]) {
+            self.seed = seed
+            var blocks = [(offset:Index, count:Index, at:(Index)->[SubElement])]()
+            var total = Index(0)
+            for k in sizes {
+                guard 0 <= k && k <= seed.count else { fatalError("size out of range") }
+                if k == 0 {
+                    blocks.append((offset:total, count:1, at:{ _ in [] }))
+                } else {
+                    let inner = Permutation<SubElement>(seed:seed, size:Index(k))
+                    blocks.append((offset:total, count:inner.count, at:{ inner[$0] }))
+                }
+                total += blocks.last!.count
+            }
+            self.blocks = blocks
+            self.count = total
+        }
+        public init<S:Sequence, Z:Sequence>(of source:S, sizes:Z) where S.Element == SubElement, Z.Element == Int {
+            self.init(seed:Array(source), sizes:Array(sizes))
+        }
+        public subscript(_ idx:Index)->[SubElement] {
+            guard 0 <= idx && idx < count else { fatalError("Index out of range") }
+            let block = blocks.last(where:{ $0.offset <= idx })!
+            return block.at(idx - block.offset)
+        }
+        public func makeIterator() -> AnyIterator<Element> {
+            var idx = Index(-1)
+            return AnyIterator {
+                idx += 1
+                guard idx < self.count else { return nil }
+                return self[idx]
+            }
+        }
+    }
+    /// combinations of several sizes in one sequence
+    /// like CartesianProduct it DOES NOT CONFORM TO CombinatoricsType
+    public struct Combinations<SubElement> : Sequence {
+        public typealias Element = [SubElement]
+        public let seed:[SubElement] // immutable
+        public let count:Index
+        let blocks:[(offset:Index, count:Index, at:(Index)->[SubElement])]
+        public init(seed:[SubElement], sizes:[Int]) {
+            self.seed = seed
+            var blocks = [(offset:Index, count:Index, at:(Index)->[SubElement])]()
+            var total = Index(0)
+            for k in sizes {
+                guard 0 <= k && k <= seed.count else { fatalError("size out of range") }
+                if k == 0 {
+                    blocks.append((offset:total, count:1, at:{ _ in [] }))
+                } else {
+                    let inner = Combination<SubElement>(seed:seed, size:Index(k))
+                    blocks.append((offset:total, count:inner.count, at:{ inner[$0] }))
+                }
+                total += blocks.last!.count
+            }
+            self.blocks = blocks
+            self.count = total
+        }
+        public init<S:Sequence, Z:Sequence>(of source:S, sizes:Z) where S.Element == SubElement, Z.Element == Int {
+            self.init(seed:Array(source), sizes:Array(sizes))
+        }
+        public subscript(_ idx:Index)->[SubElement] {
+            guard 0 <= idx && idx < count else { fatalError("Index out of range") }
+            let block = blocks.last(where:{ $0.offset <= idx })!
+            return block.at(idx - block.offset)
+        }
+        public func makeIterator() -> AnyIterator<Element> {
+            var idx = Index(-1)
+            return AnyIterator {
+                idx += 1
+                guard idx < self.count else { return nil }
+                return self[idx]
+            }
         }
     }
     /// BaseN
@@ -244,7 +382,10 @@ public struct CombinatoricsIndex<Index:SignedInteger> {
     }
 }
 public typealias Permutation        = CombinatoricsIndex<Int>.Permutation
+public typealias UniquePermutation  = CombinatoricsIndex<Int>.UniquePermutation
+public typealias Permutations       = CombinatoricsIndex<Int>.Permutations
 public typealias Combination        = CombinatoricsIndex<Int>.Combination
+public typealias Combinations       = CombinatoricsIndex<Int>.Combinations
 public typealias BaseN              = CombinatoricsIndex<Int>.BaseN
 public typealias PowerSet           = CombinatoricsIndex<Int>.PowerSet
 public typealias CartesianProduct   = CombinatoricsIndex<Int>.CartesianProduct

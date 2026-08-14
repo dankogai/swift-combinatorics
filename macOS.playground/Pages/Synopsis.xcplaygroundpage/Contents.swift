@@ -22,7 +22,10 @@ p[p.count-1] // [9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
  Explore the pages — one per iterator:
 
  - [Permutation](Permutation)
+ - [UniquePermutation](UniquePermutation)
+ - [Permutations](Permutations)
  - [Combination](Combination)
+ - [Combinations](Combinations)
  - [BaseN](BaseN)
  - [PowerSet](PowerSet)
  - [CartesianProduct](CartesianProduct)

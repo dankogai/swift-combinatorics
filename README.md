@@ -54,6 +54,17 @@ p[p.count-1] // ["d", "c"]
 p.map { $0 } // [["a","b"] ... ["d","c"]]
 ```
 
+### `UniquePermutation`
+
+Permutations of a multiset: duplicate elements yield each distinct ordering only once.  `Element` must be `Hashable`.
+
+````swift
+let u = UniquePermutation(of:"aab")
+u.count      // 3, not 3! == 6
+u.map { String($0) } // ["aab", "aba", "baa"]
+UniquePermutation(of:"mississippi").count // 34650, not 11! == 39916800
+````
+
 ### `Combination`
 
 Returns an iterator that returns the permuted array but arrays with same elements are treated as the same, regardless of the order.  Therefore you should not omit `size` or you get only one result.
@@ -67,6 +78,18 @@ c = Combination(of:"abcd", size:2)
 c.count      // 6
 c[c.count-1] // ["c","d"]
 c.map { $0 } // [["a","b"],["a","c"],["a","d"],["b","c"], ["b","d"], ["c","d"]]
+````
+
+### `Permutations` and `Combinations`
+
+Permutations and combinations of several sizes in one sequence, like swift-algorithms' `permutations(ofCount:)` and `combinations(ofCount:)` with ranges.  `sizes` accepts any sequence of `Int` — a range or an array — and size `0` contributes the single empty element.
+
+````swift
+let c = Combinations(of:"abcd", sizes:2...3)
+c.count      // 4C2 + 4C3 == 10
+c.map { String($0) } // ["ab","ac","ad","bc","bd","cd","abc","abd","acd","bcd"]
+let p = Permutations(of:"abc", sizes:[1, 3])
+p.count      // 3P1 + 3P3 == 9
 ````
 
 ### `BaseN`
@@ -176,8 +199,8 @@ Apple's [swift-algorithms] also covers combinatorics, via extension methods on `
 | index type                 | any `SignedInteger`, including `BigInt` | `Int` |
 | permutations               | `Permutation` | `permutations(ofCount:)` |
 | combinations               | `Combination` | `combinations(ofCount:)` |
-| combinations of several sizes | — | `combinations(ofCount: 2...4)` |
-| deduplicated permutations  | — | `uniquePermutations(ofCount:)` |
+| several sizes at once      | `Permutations` / `Combinations` `(of:sizes:)` | `permutations` / `combinations` `(ofCount: 2...4)` |
+| deduplicated permutations  | `UniquePermutation` | `uniquePermutations(ofCount:)` |
 | cartesian product          | `CartesianProduct` (binary), `ProductSet` (n-ary) | `product(_:_:)` (binary; compose for more) |
 | base-n / power set         | `BaseN`, `PowerSet` | — |
 | arithmetic functions       | `factorial`, `permutation`, `combination`, `.factoradic()`, `.combinadic()` | — |

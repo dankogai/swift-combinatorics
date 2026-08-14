@@ -3,7 +3,10 @@
     <pages>
         <page name='Synopsis'/>
         <page name='Permutation'/>
+        <page name='UniquePermutation'/>
+        <page name='Permutations'/>
         <page name='Combination'/>
+        <page name='Combinations'/>
         <page name='BaseN'/>
         <page name='PowerSet'/>
         <page name='CartesianProduct'/>

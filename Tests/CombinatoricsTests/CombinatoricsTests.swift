@@ -54,6 +54,44 @@ import Testing
         #expect(big[0] == Array(0..<15))
         #expect(big[big.count - 1] == Array(15..<30))
     }
+    @Test func testUniquePermutation() {
+        let u = UniquePermutation(of:"aab")
+        #expect(u.count == 3) // not 3! == 6
+        #expect(u.map{ String($0) } == ["aab", "aba", "baa"])
+        let u2 = UniquePermutation(of:"aab", size:2)
+        #expect(u2.count == 3)
+        #expect(u2.map{ String($0) } == ["aa", "ab", "ba"])
+        // same orderings as Permutation, each exactly once
+        let d = UniquePermutation(of:"aabbc")
+        #expect(d.count == 30) // 5! / (2! * 2!)
+        let strings = d.map{ String($0) }
+        #expect(Set(strings).count == 30)
+        #expect(Set(strings) == Set(Permutation(of:"aabbc").map{ String($0) }))
+        // no duplicates: degenerates to plain permutation counts
+        #expect(UniquePermutation(of:"abc").count == 6)
+        #expect(UniquePermutation(of:"mississippi").count == 34650) // 11! / (4! * 4! * 2!)
+    }
+    @Test func testPermutations() {
+        let p = Permutations(of:"abc", sizes:1...3)
+        #expect(p.count == 15) // 3P1 + 3P2 + 3P3 == 3 + 6 + 6
+        #expect(p[0] == ["a"])
+        #expect(p[3] == ["a", "b"])
+        #expect(p[p.count - 1] == ["c", "b", "a"])
+        #expect(Array(p.map{ String($0) }.prefix(3)) == ["a", "b", "c"])
+        let pp = Permutations(of:"abcd", sizes:[1, 3]) // sizes need not be contiguous
+        #expect(pp.count == 28) // 4P1 + 4P3 == 4 + 24
+        #expect(pp[4] == ["a", "b", "c"])
+    }
+    @Test func testCombinations() {
+        let c = Combinations(of:"abcd", sizes:2...3)
+        #expect(c.count == 10) // 4C2 + 4C3
+        #expect(c.map{ String($0) } == ["ab","ac","ad","bc","bd","cd","abc","abd","acd","bcd"])
+        // sizes 0...n is the power set grouped by size
+        let ps = Combinations(of:"abcd", sizes:0...4)
+        #expect(ps.count == 16)
+        #expect(ps[0] == [])
+        #expect(Set(ps.map{ String($0) }) == Set(PowerSet(of:"abcd").map{ String($0) }))
+    }
     @Test func testBaseN() {
         let bn = BaseN(of:"ab", size:2)
         #expect(bn.count == 4)
