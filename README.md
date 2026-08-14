@@ -243,7 +243,7 @@ Add the following to the `dependencies` section:
 
 ```swift
 .package(
-  url: "https://github.com/dankogai/swift-combinatorics.git", from: "0.0.1"
+  url: "https://github.com/dankogai/swift-combinatorics.git", from: "6.0.0"
 )
 ```
 
