@@ -1,4 +1,4 @@
-// swift-tools-version:4.0
+// swift-tools-version:6.0
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -6,12 +6,15 @@ import PackageDescription
 let package = Package(
     name: "BigCombinatorics",
     dependencies: [
-      .package(url:"https://github.com/attaswift/BigInt.git", from:"5.0.0"),
-      .package(url:"..", .branch("main")),
+      .package(url:"https://github.com/dankogai/swift-bignum.git", from:"6.3.1"),
+      .package(url:"..", branch:"main"),
     ],
     targets: [
-        .target(
+        .executableTarget(
             name: "BigCombinatorics",
-            dependencies: ["BigInt", "Combinatorics"]),
+            dependencies: [
+                .product(name:"BigNum", package:"swift-bignum"),
+                .product(name:"Combinatorics", package:"swift-combinatorics"),
+            ]),
     ]
 )

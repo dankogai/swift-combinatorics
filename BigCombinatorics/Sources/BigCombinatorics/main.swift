@@ -1,4 +1,4 @@
-import BigInt
+import BigNum
 import Combinatorics
 
 typealias BigPermutation = CombinatoricsIndex<BigInt>.Permutation
